@@ -1,3 +1,5 @@
+const { brotliDecompress } = require("zlib");
+
 class artCanvas{
     displayCanvas = null;
     tool = "draw";
@@ -70,13 +72,14 @@ class artCanvas{
             const doStuff = (event) => {
                 var canv = event.target
                 const l = canv.getBoundingClientRect()
-                const clientX = event.clientX-l.x;
-                const clientY = event.clientY - l.y;
+                const clientX = event.offsetX;
+                const clientY = event.offsetY;
              //   console.log(clientX)
             //    console.log(clientY)
              //   console.log(l.y)
                 var ctx = canv.getContext('2d')
                 ctx.fillStyle = test.color
+                console.log(test.color)
                 ctx.fillRect(clientX, clientY, test.size, test.size) 
             }
         } else {
@@ -147,34 +150,16 @@ class artCanvas{
         b.getContext("2d").putImageData(l, 0, 0)
     }
 
-    fill2(data, direction, maxWidth, maxHeight, x, y, r, g, b, first = false, color) {
-        this.color
-        console.log(`r: ${r} g: ${g} b: ${b}`)
+    fill2(data, direction, maxWidth, maxHeight, x, y, r, g, b, first = false, color, borderU = true, borderD = true, prevMax = null, prevMin = null) {
         const getColorIndexesForCoord = (x, y, width) => {
             const red = y * (width * 4) + x*4;
             return[red, red + 1, red + 2, red + 3]
         }
         const [indexR, indexG, indexB] = getColorIndexesForCoord(x, y, maxWidth)
-        
-        
         if (r!== data[indexR] || g!== data[indexG]||b !== data[indexB] || (x < 0 || y <0 || x >= maxWidth || y >= maxHeight)) {
-            console.log('base??')
-
-       //     data[indexR] = 0
-       //     data[indexG] = 255
-        //    data[indexB] = 0
-       //     data[indexB + 1] = 255
-          //  console.log('base')
-            console.log(direction)
-            console.log(`r: ${data[indexR]} g: ${data[indexG]} b: ${data[indexB]}`)
-            console.log(`r: ${r} g: ${g} b: ${b}`)
-         //   const [uR,uGreen,uBlue] = [data[getColorIndexesForCoord(x,y-1,maxWidth)[0]], data[getColorIndexesForCoord(x,y-1,maxWidth)[1]],data[getColorIndexesForCoord(x,y-1,maxWidth)[2]]]
-      ///     const [dR,dG,dB] = [data[getColorIndexesForCoord(x,y+1,maxWidth)[0]], data[getColorIndexesForCoord(x,y+1,maxWidth)[1]], data[getColorIndexesForCoord(x,y+1,maxWidth)[2]]]
-         //   const [rR, rG, rB] = [data[getColorIndexesForCoord(x+1,y,maxWidth)[0]],data[getColorIndexesForCoord(x+1,y,maxWidth)[1]],data[getColorIndexesForCoord(x+1,y,maxWidth)[2]]]
-          //  const [lR, lG, lB] = [data[getColorIndexesForCoord(x-1,y,maxWidth)[0]],data[getColorIndexesForCoord(x-1,y,maxWidth)[1]],data[getColorIndexesForCoord(x-1,y,maxWidth)[2]]]
-        
             switch(direction) {
                 case 'l':
+                    // no need to return previous max and minimum since they won't be used
                     if(y - 1 >= 0) {
                         const a = getColorIndexesForCoord(x+1,y+1,maxWidth)
                         const c = getColorIndexesForCoord(x+1,y-1,maxWidth)
@@ -182,27 +167,14 @@ class artCanvas{
                         const [dR,dG,dB] = [data[a[0]],data[a[1]],data[a[2]]]
                         
                      //   if(uR==data[indexR]&&uGreen==data[indexG]&&uBlue==data[indexB]) return data;
-                     if((dR == color[0] && dG == color[1] && dB == color[2] )||( uR == color[0] && uG == color[1] && uB == color[2])) { console.log('stop' + "left");return data;}
-                   //  console.log("up")
-                        data = this.fill2(data, "u", maxWidth, maxHeight, x+1, y - 1, r, g, b, false, color)
-                        data = this.fill2(data, "d", maxWidth, maxHeight, x+1, y + 1, r, g, b, false, color)
+                     if((dR == color[0] && dG == color[1] && dB == color[2] )||( uR == color[0] && uG == color[1] && uB == color[2])) {
+                         console.log('stop' + "left");
+                         return data;
+                        }
                     }
                     break;
-               /* case 'u':
-                    console.log("up")
-                    if(x + 1 < maxWidth) {
-                        const a = getColorIndexesForCoord(x+1,y+1,maxWidth)
-                        const [rR, rG, rB] = [data[a[0]],data[a[1]],data[a[2]]]
-                        if(rG === 255) { console.log('stop' + "up");return data;}
-
-                    //    if(rR==data[indexR]&&rG==data[indexG]&&rB==data[indexB]) return data;
-                     //   console.log("right")
-                        data = this.fill2(data, "r", maxWidth, maxHeight, x+1, y+1, r, g, b)
-                    }
-                    break;*/
                 case 'r': 
-                console.log('switch r   ')
-                console.log(`r: ${data[indexR]} g: ${data[indexG]} b: ${data[indexB]}`)
+                    // no need to return max and minimum since they won't be used
                     if(y + 1 <= maxHeight ) {
                         console.log('hiii')
                         const a = getColorIndexesForCoord(x-1,y+1,maxWidth)
@@ -210,118 +182,138 @@ class artCanvas{
                         const [dR,dG,dB] = [data[a[0]],data[a[1]],data[a[2]]]
                         const [uR,uG,uB] = [data[c[0]],data[c[1]],data[c[2]]]
                        // if(dR==data[indexR]&&dG==data[indexG]&&dB==data[indexB]) return data;
-                       if((dR == color[0] && dG == color[1] && dB == color[2]) ||( uR == color[0] && uG == color[1] && uB == color[2])) { console.log('stop' + "left");return data;}
-                     //   console.log("down")
-                         data = this.fill2(data, "d", maxWidth, maxHeight, x-1, y+1, r, g, b, false, color)
-                        data = this.fill2(data, "u", maxWidth, maxHeight, x-1, y-1, r, g, b, false, color)
+                       const downMatches = (dR == color[0] && dG == color[1] && dB == color[2])
+                       const upMatches = ( uR == color[0] && uG == color[1] && uB == color[2])
+                       if( downMatches|| upMatches) {
+                        console.log('stop' + "left");return data;
+                        }
                     }
                     break;
-            /*   case 'd':
-                    console.log("down")
-                    if(x - 1 >= 0) {
-                        const a = getColorIndexesForCoord(x-1,y-1,maxWidth)
-                        const [lR, lG, lB] = [data[a[0]],data[a[1]],data[a[2]]]
-                       // if(lR==data[indexR]&&lG==data[indexG]&&lB==data[indexB]) return data;
-                        if(lG === 255){ 
-                            console.log('stop' + 'd');return data;}
-                      //  console.log("right")
-                        data = this.fill2(data, "l", maxWidth, maxHeight, x-1, y-1, r, g, b)
-                    }
-                break;*/
+               case 'u':
+                    prevMin = y + 1;
+                    break;
+                case 'd':
+                    prevMax = y - 1;
+                    break;
             }
-
-
-
-
-
-            return data;
+            return [data, prevMax, prevMin];
         }   
-      //  console.log('not base')
-      if(!first){
+        if(!first){
             data[indexR] = color[0]
             data[indexG] = color[1]
             data[indexB] = color[2]
             data[indexB + 1] =255
-      }
-       // console.log(direction)
-
+        }
         switch(direction) {
-            
             case 'l':
-                //console.log("not base")
                 if(x >= 0) {
-                    const a = getColorIndexesForCoord(x-1,y+1,maxWidth)
-                        const c = getColorIndexesForCoord(x-1,y-1,maxWidth)
-                        const [dR,dG,dB] = [data[a[0]],data[a[1]],data[a[2]]]
-                        const [uR,uG,uB] = [data[c[0]],data[c[1]],data[c[2]]]
-                        if((dR == color[0] && dG == color[1] && dB == color[2] )|| (uR == color[0] && uG == color[1] && uB == color[2])) {data = this.fill2(data, 'l', maxWidth, maxHeight, x - 1, y, r, g, b, false, color)}
-                        else {
-                            data = this.fill2(data, "u", maxWidth,maxHeight, x - 1, y, r, g, b, true, color)
-                            data = this.fill2(data, "d", maxWidth,maxHeight, x - 1, y, r, g, b, true, color)
-                            data = this.fill2(data, "l", maxWidth,maxHeight, x - 1, y, r, g, b, false, color)
+                    const a = getColorIndexesForCoord(x,y+1,maxWidth)
+                    const c = getColorIndexesForCoord(x,y-1,maxWidth)
+                    const [dR,dG,dB] = [data[a[0]],data[a[1]],data[a[2]]]
+                    const [uR,uG,uB] = [data[c[0]],data[c[1]],data[c[2]]]
+                    const downMatches = (dR == color[0] && dG == color[1] && dB == color[2])
+                    const upMatches = ( uR == color[0] && uG == color[1] && uB == color[2])
+                    if(downMatches|| upMatches){
+                            data = this.fill2(data, 'l', maxWidth, maxHeight, x - 1, y, r, g, b, false, color, !downMatches, !upMatches)[0]
+                            prevMax = data[1]
                     }
-                    
-                    
+                    else {
+                        data = this.fill2(data, "d", maxWidth,maxHeight, x, y+1, r, g, b, false, color,false, false, prevMax)[0]
+                        prevMax = data[1] // for down
+                        data = this.fill2(data, "u", maxWidth,maxHeight, x, y-1, r, g, b, false, color,false, false, y-1, prevMin)[0]
+                        prevMin = data[2] // for up
+                        data = this.fill2(data, "l", maxWidth,maxHeight, x - 1, y, r, g, b, false, color,false, false, prevMax,prevMin)[0]
+                        //  prevMax = data[1]
+                    }
                 }
-                
                 break;
             case "r":
-
                // console.log("test")
                 if(x< maxWidth) {
-                    const a = getColorIndexesForCoord(x+1,y+1,maxWidth)
-                        const c = getColorIndexesForCoord(x+1,y-1,maxWidth)
+                        const a = getColorIndexesForCoord(x,y+1,maxWidth)
+                        const c = getColorIndexesForCoord(x,y-1,maxWidth)
                         const [dR,dG,dB] = [data[a[0]],data[a[1]],data[a[2]]]
                         const [uR,uG,uB] = [data[c[0]],data[c[1]],data[c[2]]]
-                        if((dR == color[0] && dG == color[1] && dB == color[2] )|| (uR == color[0] && uG == color[1] && uB == color[2])) {data = this.fill2(data, 'r', maxWidth, maxHeight, x + 1, y, r, g, b, false, color)}
+                       const downMatches = (dR == color[0] && dG == color[1] && dB == color[2])
+                       const upMatches = ( uR == color[0] && uG == color[1] && uB == color[2])
+                        if(downMatches || upMatches) { //fill in a straight line
+                    // borderU is if the previous pixel is on the fill border above
+                    // borderD is if the previous pixel is on the fill bottom border
+                            data = this.fill2(data, 'r', maxWidth, maxHeight, x + 1, y, r, g, b, false, color, !downMatches, !upMatches, prevMax, prevMin)
+                            console.log('up and down are not valid')
+                        }
                         else {
-                            data = this.fill2(data, "u", maxWidth,maxHeight, x + 1, y, r, g, b, true, color)
-                            data = this.fill2(data, "d", maxWidth,maxHeight, x + 1, y, r, g, b, true, color)
-                            data = this.fill2(data, "r", maxWidth, maxHeight, x +1, y, r, g, b, false, color)
+                            var downFill = this.fill2(data, "d", maxWidth,maxHeight, x, y + 1, r, g, b, false, color, false, false, prevMax, prevMin)
+                            data = downFill[0]
+                            prevMax = downFill[1]
+                            var upFill = this.fill2(data, "u", maxWidth,maxHeight, x, y - 1, r, g, b, false, color, false, false, prevMax, prevMin)
+                            data = upFill[0]
+                            prevMin = upFill[2]
+                            data = this.fill2(data, "r", maxWidth, maxHeight, x +1, y, r, g, b, false, color, false, false, prevMax, prevMin)[0]
                         }
                     }
                 break;
-            case "u":
-                console.log("not base")
-              //  console.log("not base")
+            case "u": // borderL, borderR
                 if(y  >= 0) {
-                    
-                    data = this.fill2(data, "u", maxWidth,maxHeight, x, y-1, r, g, b, false, color)
+                    if(!borderU) {
+                    //pixels on the edge of the fill area
+                    // want to try to go left and right
+                        val = this.fill2(data, "u", maxWidth,maxHeight, x, y-1, r, g, b, false, color, false, true, prevMax, prevMin)
+                        data = val[0]
+                        prevMin = val[2] // obviously if you're higher than the border, previous minimum
+                        val = this.fill2(data, "r", maxWidth,maxHeight, x+1, y, r, g, b, true, color, false, true)
+                        data = val[0] //  tries to go left
+                        val = this.fill2(data, "l", maxWidth,maxHeight, x -1, y, r, g, b, false, color, true, true)
+                        data = val[0]
+                    }
+                    else if(borderU && x < prevMax){
+                    // pixels in the middle of the fill area, at the highest point
+                    // they're treated as if they're a border pixel
+                    // try to go left and right
+                        const val = this.fill2(data, "u", maxWidth,maxHeight, x, y-1, r, g, b, false, color,false, true, prevMax, prevMin)
+                        data = val[0]
+                        prevMin = val[2]
+                        val = this.fill2(data, "r", maxWidth,maxHeight, x+1, y, r, g, b, true, color, false, true)
+                        data = val[0] //  tries to go left
+                        val = this.fill2(data, "l", maxWidth,maxHeight, x -1, y, r, g, b, false, color)
+                        data = val[0]
+                    }
+                    else if (borderU && x === prevMax) {
+                        console.log('')
+                    }
                 }
                 break;
             case 'd':
-                if(y < maxHeight) {
-                    
+                if(y <= prevMax) {
                 //    console.log("not base")
-                    data = this.fill2(data, "d", maxWidth,maxHeight, x, y+1, r, g, b, false, color)
+                    const val = this.fill2(data, "d", maxWidth,maxHeight, x, y+1, r, g, b, false, color)
+                    data = val[0]
+                    prevMax = val[1]
+                } else if (borderD && borderU) {
+    
+                    const val = this.fill2(data, "d", maxWidth,maxHeight, x, y+1, r, g, b, false, color)
+                    data = val[0]
+                    prevMin 
                 }
-            
+                break;
 
         }
-      //  console.log("test")
-        
-        return data;
+        return [data, prevMax, prevMin];
     }
     fill(event) {
 
-        this.r = (blue1) => {
-            console.log(blue1)
-        }
-
-        
-       // console.log('filling....')
-        console.log(this)
         const boundingRect = this.displayCanvas.getBoundingClientRect()
-        console.log(boundingRect.width)
         const context = this.displayCanvas.getContext('2d')
-    
-      //  context.fillStyle= 'red'
-     //       context.fillRect(0, 0, boundingRect.width, boundingRect.height)
-
-
-        console.log(boundingRect.height)
         var data = context.getImageData(0, 0, boundingRect.width, boundingRect.height).data
-     //   console.log(data)
+        for (const thing of data) {
+           // console.log(typeof(thing))
+            if (thing === 255 || thing === 0) {
+               // console.log('s')
+            } else {
+              //      console.log('not s')
+                console.log(thing)
+            }
+        }
         const getColorIndexesForCoord = (x, y, width) => {
             const red = y * (width * 4) + x*4;
             return[red, red + 1, red + 2, red + 3]
@@ -329,98 +321,18 @@ class artCanvas{
         var finished = true
         var left = 4;
         var right = 4;
-        const [red1, green1, blue1, alpha1] = getColorIndexesForCoord(event.offsetX, event.offsetY, boundingRect.width)
+        const [red1, green1, blue1, alpha1] = getColorIndexesForCoord(event.offsetX, event.offsetY, boundingRect.width)[0]
         var b = 0;
-        var [lastRed, lastGreen, lastBlue] = getColorIndexesForCoord(event.offsetX, event.offsetY, boundingRect.width)
+        var [lastRed, lastGreen, lastBlue] = getColorIndexesForCoord(event.offsetX, event.offsetY, boundingRect.width)[0]
         const [redVal, greenVal, blueVal] = [data[red1], data[green1], data[blue1]]
-        console.log(redVal)
         const regEx = /\d{1,3}/g
-        console.log(this.color)
         const thisColor = this.color.match(regEx)
-        console.log(thisColor)
-     //   `rgba(${redValue}, ${greenValue}, ${blueValue}, ${alphaValue})`
         data = this.fill2(data, 'l', boundingRect.width, boundingRect.height, event.offsetX, event.offsetY, redVal, greenVal, blueVal, true, thisColor)
         data = this.fill2(data, 'r', boundingRect.width,boundingRect.height,event.offsetX, event.offsetY, redVal, greenVal, blueVal, false, thisColor)
         var x = 1;
         var y = 1;
         
-       /* while(left >= 0 || right >= 0) {
-            b++;
-            
-            if (b > 10000000000) {
-                console.log('too big')
-                break;
-            }
-            console.log('i')*/
-            
-         /*   if (event.offsetX - y >= 0 && left >= 0){
-                const [lRed, lGreen, lBlue, lAlpha] = getColorIndexesForCoord(event.offsetX - y, event.offsetY, boundingRect.width)
-                const [red, blue, green] = [data[lRed], data[lBlue], data[lGreen]]
-                const isFullyRight = event.offsetX - y
-                if(red === redVal && green === greenVal && blue === blueVal && isFullyRight >= 0){
-                    y++;
-                //    console.log('working left ..')
-                 //   console.log("is fully left " + isFullyRight)
-                  // console.log(`red: ${red}, green: ${green}, blue: ${blue}`)
-                  //  console.log(`red: ${redVal}, green: ${greenVal}, blue: ${blueVal}`)
-          //        console.log(`left: ${lastRed - left}`)
-                    data[lRed] = 255
-                    data[lGreen] = 255
-                    data[lBlue] = 255
-                    data[lAlpha] = 255
-                    left+=4
-                } else {
-                    
-                //    console.log("is fully left " + isFullyRight)
-         //           console.log('done left + 1  ')
-                    left = -1
-                } 
-            } else {
-          //      console.log('done left + 2')
-                left = -1
-            }
-            if(event.offsetX + x < boundingRect.width && right >= 0){
-                const [rRed, rGreen, rBlue, rAlpha] = getColorIndexesForCoord(event.offsetX + x, event.offsetY, boundingRect.width)
-                const [red, blue, green] = [data[rRed], data[rBlue], data[rGreen]]
-            //   console.log(`red: ${red}, green: ${green}, blue: ${blue}`)
-                const isFullyRight = event.offsetX + x
-                if(redVal === red && greenVal === green && blueVal === blue && isFullyRight <= boundingRect.width) {
-                    x++;
-                 //   console.log("workign right")
-                   // console.log("is fully right: " + isFullyRight)
-          //         console.log(`right:  ${lastRed +  right}`)
-                    data[rRed] = 255
-                    data[rGreen] = 255
-                    data[rBlue] = 255
-                    data[rAlpha] = 255
-                    right +=4
-                }
-                
-                else {
-                   // console.log(boundRect.width)
-                  //  console.log("is fully right: " + isFullyRight)
-                //    console.log('right done')
-
-                 //  console.log(`red: ${red}, green: ${green}, blue: ${blue}`)
-                  // console.log(`red: ${redVal}, green: ${greenVal}, blue: ${blueVal}`)
-                 //   console.log(`red: ${red}, green: ${green}, blue: ${blue}`)
-                   // console.log(` expected red: ${redVal}, green: ${greenVal}, blue: ${blueVal}`)
-                    right = -1
-                }
-            } else {
-              //  console.log('right done')
-                right = -1
-            }
-            
-
-        }
-        data[red1] = 255;
-        data[green1] = 255;
-        data[blue1] = 255;*/
-        console.log(data + "tesrt")
-        
         const newImg = new ImageData(data, boundingRect.width, boundingRect.height)
-   //     console.log(data)
         this.displayCanvas.getContext("2d").putImageData(newImg, 0, 0);
     }
 
