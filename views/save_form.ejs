@@ -1,0 +1,63 @@
+<div style="background-color: blanchedalmond; width: 100%; display: block;">
+    <script> console.log("aaaaaaa")</script>
+    <p style="font-size: large; text-transform: lowercase;"> Select Slot to Save Data</p>
+    <%= console.log('aaaaaabbbb') %>
+    
+    <form id = 'select_slot_form' name="select_slot_form" method="post" action="/save">
+    <input name = 'name' type="text" style="height: 10px; display: block;">
+    <input name= 'drawing_data' id = 'drawing_data' type="hidden" required value = <%=drawing_data%>
+    
+    
+    <% if(all_available.length > 0) {for (s in all_available) {%>
+        <%=console.log(all_available)%>
+      <!--    <p><input type="radio" value =<%=`${s.url}/update`%>><%-s.name%></p>-->
+            <script>
+                const i = document.getElementById('select_slot_form')
+        
+              /*  for(d in i.getChildElements()) {
+                    d.addEventListener('click', () => {
+                        i.action = d.value
+                    })
+                }*/
+            </script>
+    <%}}%>
+    <%for ( i = 0; i < remaining; i++) { %>
+        <p><input name = 'remaining_name' type="radio" value="/save">unsaved slot <%=i%></p> 
+        <script> 
+            var go = document.getElementById('select_slot_form')
+            if(go !== null){
+                console.log(go)
+                for(const d of go.children) {
+                    d.addEventListener('click', () => {
+                        go.action = "/save"
+                })
+            }
+            }
+            
+            
+        </script>
+    <%}%>
+   
+    <button type="submit" style="border: 0px;display: block; width: 100%; height: 20px;"> </button>
+</form>
+    <style> 
+        table,body{
+            border: 1px solid black;
+        }
+    </style>
+
+
+<script src = 'javascripts/optional.js' defer></script>
+</div>
+
+<div style="background-color:red; font: 16px bold"> 
+    <%=console.log(typeof(errors))%>
+    <% if(typeof(errors) !== 'undefined') {%>
+        <%=console.log(typeof(errors))%>
+        <%=console.log('bazinga')%>
+        <%for(error of errors) {%>
+            <%=console.log(error.msg)%>
+            <p> <%=error.msg%></p>
+       <% }
+    }%>
+</div>

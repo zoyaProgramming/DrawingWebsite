@@ -1,0 +1,54 @@
+<script> 
+    function onclick(event){
+        try {
+            const button = event.target
+            const dialog = document.getElementById('dialog_element')
+            dialog.style.display= 'inline-box'
+        } catch (error) {
+            console.log(error)
+            throw new Error(error)
+        }   
+    }
+</script>
+<div>
+    
+        <%for(item of all_available){%>
+            <button id = <%=item.id%> class="dialog_opener" name= <%=item.name%>> <%=item.name%></button>
+        <%}%>
+
+    
+</div>
+
+
+<dialog id="dialog_element" style="background-color: azure;"> 
+    do you want to load this?
+    <form id= 'load_form_get' method="get" action=""> 
+        <button id='dialog_close'type='submit' onclick="this.parentElement.dialog('close')" >don't load</button>
+        <button id ='dialog_open' type="submit" value="">Load</button>
+    </form>
+</dialog>
+<script> 
+    function onclick(event){
+        try {
+            console.log('hiiiii')
+            const button = event.target
+            const name = button.name
+            const dialog = document.getElementById('dialog_element')
+            const load_open = document.getElementById('dialog_open')
+            load_open.formAction=`/${button.id}`
+            dialog.style.display='inline-block'
+            dialog.display=dialog
+            dialog.style.height = '300px'
+            dialog.style.width = '300px'
+        } catch (error) {
+            console.log(error)
+            throw new Error(error)
+        }   
+    }
+
+    const items = document.getElementsByClassName('dialog_opener')
+    for(item of items) {
+        
+        item.addEventListener('click', onclick)
+    }
+</script>

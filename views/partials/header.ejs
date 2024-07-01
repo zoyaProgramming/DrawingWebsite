@@ -1,0 +1,211 @@
+<header name="file_options" class="top_bar">
+    <button id="view_save_options_button" class ="menu_button" id= "t" type="button"style="height: 20px; vertical-align: middle;" onclick="loadSaveOptions('POST')">save</button>
+    <button id="load_button" class= 'menu_button' type="submit" style=" width: fit-content; height: 20px; vertical-align: middle;" onclick="loadSaveOptions('GET')">Load</button>
+    
+<script src = '/javascripts/render_drawing_save_form.js'></script>
+<dialog id = 'view_dialog'>
+    <form id="save_load_form" method="post"> 
+        <input id = 'drawing_data' name="drawing_data" type='hidden' required value=<%=drawing_data%>>
+       <input name ='id1' id = 'id_input' type = 'hidden'>>
+        <input name = 'method' id="123" type="hidden" required value = '' >
+        <div id = 'save_load_div' style="display: inline-block; height: fit-content; background-color: transparent; align-items: center; font-size: 0; position: sticky; width: fit-content;"></div>
+       <input id = 'save_load_form_submit' type="submit" onclick="bbbb(event)">
+  </form>
+    <button onclick="event.target.parentElement.style.visibility = 'hidden'" style="background-color: gray; display: block; margin: auto;">close</button>
+</dialog>
+<dialog id = 'test5'> </dialog>
+
+</header>
+<header height = '300' style="display: flex;">
+    <div name = 'color_palettes' style="display: inline-block; vertical-align: top; height: 120px;">
+        <h5 style="display: block; margin: 0; height: 20px;"> ooga</h5>
+        <canvas id="myRainbow" width="50" height="100" style="display: inline-block; margin: 0; border: 0;"></canvas>
+        <canvas class="colorpicker" id= "myCanvas" width='100' height= '100' style="display: inline-block;"></canvas>
+    </div>
+    <div id= "display_view"></div>
+
+
+    <div style="vertical-align: top; display: inline-block;">
+        <h5 style="display: block; margin: 0; font-size: 10px; height: 20px;">size</h5>
+
+            <div id = "slider_parent" width="300" height="50" style="background-color: aliceblue; height:100px; width: 20px; display: flex; margin: auto;">
+                <div id="slider_child" style="margin-top:1px;margin-left: 1px; margin-right: 1px; background-color: antiquewhite; width: 100%; height: 98px;"></div>
+            </div>
+        </div>
+    </div>
+    <div style="color: aliceblue; display: block; height: 100%; width: fit-content;">
+        <h1> jdsifj</h1>
+        <p> test</p>
+        <button id="fill_tool_selector_button" onclick="draw.setTool(undefined, undefined,'fill')"> fill</button>
+    </div>
+</header>
+
+
+// scripts:
+<script>
+    const dialog = document.getElementById('view_dialog')
+    async function getDetails() {
+        try {
+            const response = await fetch('/drawingapp/save', {
+                method: 'get',
+                headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+            var c = await response.text()
+            c = (decodeURIComponent(c))
+            const regex = /{.*?}/g
+            const matchArray = c.match(regex)
+            const stylesheet = document.styleSheets[0]
+            var finalArray = []
+            const len  = matchArray===null?0:matchArray.length
+            for(var i = 0; i< len; i++) {
+                const r = JSON.parse(matchArray[i])
+                finalArray[i] = r;
+            }
+            return finalArray;
+        } catch(e) {
+            console.log('error getting details about all drawings: ')
+            console.error(e)
+        }
+    }
+    async function loadSaveOptions(method) {
+        if(true) {
+            console.log('creating again........')
+            const thisDiv = document.getElementById('save_load_div')
+            console.log('this div : ' + thisDiv)
+            console.log( ' form method.... ' + document.getElementById('123'))
+            const style = document.styleSheets[0]
+            getDetails().then(function(response){
+                dialog.style.visibility = 'visible'
+                while(thisDiv.firstChild !== null) {
+                    console.log('first : ')
+                    console.log(thisDiv.firstChild)
+                    thisDiv.firstChild.remove(); 
+                }
+                const id_input = document.getElementById('id_input')
+                const formMethod = document.getElementById('123')
+                const save_status = method==='GET'?checkIfSaved(response):true;
+                if(!save_status) {
+                    //TODO:---->render save check prompt
+                }
+                if(method==="POST") {
+                    draw.save()
+                }
+                console.log(formMethod + 'exists?')
+                formMethod.value = method
+                const numSaves=method==='GET'?  0:10 - response.length
+                for(var i = 0; i< response.length; i++ ) {
+                    const save = response[i]
+                    const label = document.createElement('label')
+                    label.innerText = save.name
+                    const b = document.createElement('input')
+                    const span = document.createElement('span')
+                    b.type= 'radio'
+                    b.name='id'
+                   thisDiv.append(span)
+                   span.appendChild(b)
+                    span.appendChild(label)
+                    span.style.display='block'
+                    label.style.width = '100px'
+                    label.style.height = '13px'
+                    label.style.fontSize = '14px'
+                    b.id=save.name
+                    label.htmlFor = b.id;
+                    b.style.cssText = style.cssRules
+                    label.style.cssText = style.cssRules
+                    label.height='13'
+                    b.value = save._id
+                    console.log('B: ' + b.value)
+                    label.style.display='inline'
+                    b.style.fontSize= '10px'
+                    b.style.width='auto'
+                    b.className = 'radio'
+                    b.style.margin = 0
+                    b.style.verticalAlign = top
+                    b.innerText = 'tes'
+                    b.style.display='inline'
+                    b.className = 'existing_save_slot'
+                for(var i = 0; i< numSaves; i++) {
+                    const b = document.createElement('input')
+                    b.name='id'
+                    const label = document.createElement('label')
+                    const span = document.createElement('span')
+                    const thisDiv = document.getElementById('save_load_div')
+                    thisDiv.appendChild(span)
+                    label.style.width = '100px'
+                    b.type= 'radio'
+                    b.value= ' '
+                    span.append(b)
+                    span.append(label)
+                    label.innerText = i+ "new save slot"
+                    b.id=i;
+                    span.style.display = 'block'
+                    label.htmlFor = i;
+                    label.style.cssText = style.cssRules
+                    label.style.width = '100px'
+                    label.style.height = '13px'
+                    label.style.fontSize = '14px'
+                    label.style.display='inline'
+                    
+                    b.style.height='20px'
+                    b.style.margin='0'
+                    b.innerHTML = 'new save'
+                    b.className = 'new_save_slot'
+                    b.style.cssText = style.cssRules
+                    b.style.cssText = style.cssRules
+                    b.style.width='auto'
+                    b.style.display= 'inline'
+                }
+                dialog.style.display = 'block'
+            }})
+            isLoaded = true
+        } else {
+            dialog.style.visibility = dialog.style.visibility === 'visible'? 'hidden':'visible'
+        }
+    }
+
+    function checkIfSaved(data) {
+        const mainCanvas = document.getElementById('main_canvas')
+        const details = draw.save(mainCanvas)
+        const size = mainCanvas.getBoundingClientRect()
+        const context = mainCanvas.getContext('2d')
+        const imgData = context.getImageData(0, 0, size.width, size.height)
+        const dataElement = document.getElementById('drawing_data')
+        if(dataElement.value === `[${imgData.data}]`) {
+            console.log('This is unsaved!')
+            return false;
+        } else {
+            console.log('This is saved!')
+            return true;
+        }
+        `[${imgData.data}]`
+        dataElement.value = `[${imgData.data}]`
+        return imgData;
+    }
+    
+    function createDialog() {
+
+        const style = document.styleSheets[0]
+        const dialog = document.createElement('dialog')
+        dialog.style.display= 'dialog'
+        dialog.id ='new_dialog'
+        dialog.style.cssText = style.cssRules
+        dialog.style.visibility = 'visible'
+        const body = document.DOCUMENT_NODE
+        body.appendChild(dialog)
+        return dialog;
+    }
+
+    function close(){
+        const save_load_form = document.getElementById('save_load_form')
+        dialog.style.display= 'none'
+    
+    }
+    function resetOptions() {
+        const thisDiv = document.getElementById("save_load_div")
+        while(thisDiv.firstChild) {
+            thisDiv.firstChild.remove(); 
+        }
+    }
+</script>

@@ -1,0 +1,136 @@
+*{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+body{
+    background-color: rgb(255, 255, 255);
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+header{
+    background-color: rgb(110, 154, 234);
+    max-height: max-content;
+    height: 120px;
+    vertical-align: middle;
+;
+}
+div{
+    background-color: rgb(185, 185, 255);
+    width: inherit;
+    height: max-content;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 0;
+}
+.top_bar{
+    height: 20px;
+    display: block;
+    width: 100%;
+    background-color: cornflowerblue;
+}
+.menu_button{
+    background-color: cornflowerblue;
+    border: 0;
+    text-transform: lowercase;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font: 1.2rem;
+}
+.menu_button:hover{
+    background-color: rgb(92, 138, 223);
+}
+
+
+.colordiv{
+    display: block;
+    height: 2in;
+    width: 2in;
+    font-size: 14px;
+    background:linear-gradient(90deg, red, transparent);
+    background:-o-linear-gradient(red, transparent);
+}
+
+.colorpicker{
+    display: block-inline;
+
+    background-color:rgba(red, green, blue, alpha)
+
+}
+
+canvas{
+    outline: 2px solid black;
+    vertical-align: top;
+
+    margin: none;
+}
+
+#rain{
+    border: none;
+    border-style: solid;
+}
+#display_view{
+    
+    width: 50px;
+}
+#dialog{
+
+    font: 100 black bold;
+
+}
+dialog{
+    border-radius: 2.5%;
+    border: rgb(236, 236, 236) 1px solid;
+}
+h5{
+    font: 10px;
+}
+button{
+    width: auto;
+    height: 20px;
+    border: none;
+    
+    
+}
+button:hover{
+    
+    background-color: rgb(211, 211, 211);
+}
+
+label{
+    height: 20px;
+    width: auto;
+    display: block;
+    font-size:medium
+}
+
+input{
+    color: red;
+    background-color: aqua;
+}
+.radio{
+    position: relative;
+    display: inline;
+    cursor: pointer; 
+    user-select:none;
+    text-align: left;
+    border: yellow;
+
+    height: 100%;
+    margin: none;
+}
+
+a{
+    color: rgb(31, 27, 27);
+    text-decoration: none;
+    
+    font-size: medium;
+    background-color: rgb(255, 255, 255);
+    width:fit-content;
+    height: fit-content;
+    display: block;
+}
+
+form{
+    background-color: rgb(255, 255, 255);
+}
+input{
+    font-size: 14px;
+}
